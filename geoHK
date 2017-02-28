@@ -1,0 +1,49 @@
+library(data.table)
+library(SOAR)
+Objects()
+source("GeoLoc.R")
+
+df<-read.csv("./Merchant (201701) - Copy.csv")
+
+head(df)
+
+df$Merchant_Name2 = paste0(df[,1], c(", hong kong"))
+q_address_hk_all <- unique(df$Merchant_Name2)
+
+length(q_address_hk_all)
+
+Store(q_address_hk_all)
+
+
+df_out = NULL
+OVER_QUERY_LIMIT_LIST = NULL
+q_address<-q_address_hk_all[101:1800]
+
+length(q_address)
+
+
+
+last_stop_index<-392
+for(i in last_stop_index:length(q_address))
+{
+  print(i)
+  address = q_address[i]
+  
+  tmp =  geoCode(address)
+  
+  if(length(tmp) > 1)
+  {
+    
+    df_out = rbind(df_out, tmp)
+    #str(df_out)
+  } else {
+    OVER_QUERY_LIMIT_LIST = c(OVER_QUERY_LIMIT_LIST, address)
+  }
+  Sys.sleep(1)
+}
+
+dim(df_out)
+length(OVER_QUERY_LIMIT_LIST)
+print(nrow(df_out)+length(OVER_QUERY_LIMIT_LIST))
+head(df_out,10)
+
